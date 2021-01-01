@@ -54,7 +54,7 @@ def spider():
 # 将数据写入csv
 def write_csv(data):
     headers = ["名称", "总人口（万）", "面积（万)", "区域", "排名"]
-    with open('renkou.csv', 'w', newline='', encoding='utf-8-sig')as f:
+    with open('population.csv', 'w', newline='', encoding='utf-8-sig')as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
         f_csv.writerows(data)
