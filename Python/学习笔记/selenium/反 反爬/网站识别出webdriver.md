@@ -3,7 +3,7 @@
 +所以改变这个值就能不被识别出来
 
 
-'''
+'''python
 # -*- coding: utf-8 -*-
 from selenium.webdriver import Chrome, ChromeOptions
 chrome_driver= Chrome(executable_path=r'C:\chromedriver.exe')
