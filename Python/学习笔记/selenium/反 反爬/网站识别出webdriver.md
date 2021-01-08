@@ -3,7 +3,7 @@
 +所以改变这个值就能不被识别出来
 
 
-'''python
+```python
 # -*- coding: utf-8 -*-
 from selenium.webdriver import Chrome, ChromeOptions
 chrome_driver= Chrome(executable_path=r'C:\chromedriver.exe')
@@ -22,4 +22,4 @@ chrome_driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
 
 chrome_driver.get("https://kyfw.12306.cn/otn/resources/login.html")
 
-'''
+```
