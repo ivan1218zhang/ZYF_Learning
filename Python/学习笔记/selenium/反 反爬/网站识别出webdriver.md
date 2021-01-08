@@ -1,5 +1,5 @@
-2021.1.8
-网页通过查看浏览器的navigator.webdriver的值 确认是否是webdriver
+2021.1.8  
+网页通过查看浏览器的navigator.webdriver的值 确认是否是webdriver  
 所以改变这个值就能不被识别出来
 
 
