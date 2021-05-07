@@ -211,19 +211,17 @@ class SpiderLogin:
                 result.append(data)
 
         # header = ['职位名称', '薪资下限', '薪资上限', '工作地点', '年限要求', '学历要求', '福利待遇', '工作职责', '任职资格', '公司_url', 'detail_url']
-        driver.close()
-        target = ''
-        for i in city_list:
-            if i['code'] == city_id:
-                target = i['city']
-                break
-        with open('{}_part1.csv'.format(target), 'w', encoding='utf-8', newline='') as f:
-            writer = csv.writer(f)
-            # writer.writerow(header)
-            for i in result:
-                writer.writerow(
-                    [i["职位名称"], i["薪资下限"], i["薪资上限"], i["工作地点"], i["年限要求"], i["学历要求"], i["福利待遇"], i["工作职责"], i["任职资格"],
-                     i["公司_url"], i["detail_url"]])
+            target = ''
+            for i in city_list:
+                if i['code'] == city_id:
+                    target = i['city']
+                    break
+            with open('{}_part1.csv'.format(target), 'w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                # writer.writerow(header)
+                for i in result:
+                    writer.writerow(
+                        [i["职位名称"], i["薪资下限"], i["薪资上限"], i["工作地点"], i["年限要求"], i["学历要求"], i["福利待遇"], i["工作职责"], i["任职资格"],i["公司_url"], i["detail_url"]])
 
 
 if __name__ == '__main__':
