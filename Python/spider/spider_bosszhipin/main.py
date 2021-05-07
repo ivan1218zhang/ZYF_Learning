@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-from spider_part_1 import spider_1
 from settings import city_list
 from spider_login import SpiderLogin
 
@@ -7,7 +6,7 @@ if __name__ == '__main__':
     spider = SpiderLogin()
     spider.login()
     for k in range(10, len(city_list)):
-        spider_1(city_list[k]['code'])
+        spider.spider_1(city_list[k]['code'])
         text = spider.read(city_list[k]['city'] + "_part1.csv")
         flag = 0
         l = len(text)
