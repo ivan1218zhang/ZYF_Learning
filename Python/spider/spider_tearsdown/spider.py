@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
+from time import sleep
+
+import threadpool as threadpool
 
 from settings import base_url
 import requests
 from lxml import etree
-from time import sleep
 import re
 
 
@@ -27,7 +29,7 @@ class Spider:
         pass
 
     def get_url(self, p):
-        response = requests.get(url=base_url.format(p),headers=self.data)
+        response = requests.get(url=base_url.format(p), headers=self.data)
         text = response.text
         html = etree.HTML(text)
         urls = html.xpath("//a[@class='list-title text-md h-2x']/@href")
@@ -38,81 +40,72 @@ class Spider:
         return result
 
     def detail(self, u):
-        result1 = []
-        result2 = []
-        response = requests.get(url=u)
-        text = response.text
-        html = etree.HTML(text)
-        f_img = html.xpath(
-            "//div[@class='post']/div[@class='post-poster rounded mb-4']/div[@class='media media-3x1']/div[@class='media-content']/@style")
-        f_img = self.pat.search(str(f_img)).group()
-        title = html.xpath("//div[@class='post']/h1/text()")[0].split('/')
+        response = requests.get(u)
+
+        html = response.text
+        content = etree.HTML(html)
+        text = content.xpath("//div[@class='post-content']/div/p")
+        img_urls = content.xpath("//div[@class='post-content']/div/p//img/@src")
+        num = 0
+        data = []
+        for i in text:
+            if len(i.findall('img')) !=0:
+                data.append(img_urls[num])
+                num = num + 1
+            else:
+                data.append(i.xpath("string(.)"))
+
+        title = content.xpath("//div[@class='post']/h1/text()")[0].split('/')
         title = ' '.join(title)
         print(title)
-        content1 = html.xpath("//div[@class='nc-light-gallery']/p/span")
-        content2 = html.xpath("//div[@class='nc-light-gallery']/p")
-
-        img_urls1 = [f_img]
-        img_urls2 = [f_img]
+        print("\n".join(data))
         try:
             os.mkdir(title)
         except Exception as e:
             print("已经存在该目录")
 
-        result1.append("封面:" + f_img + '\n')
-        result1.append("标题:" + title + '\n')
-
-        result2.append("封面:" + f_img + '\n')
-        result2.append("标题:" + title + '\n')
-
-        for c in content1:
-            img = c.findall('img')
-            if len(img) != 0:
-                result1.append('\n' + img[0].get('src'))
-                img_urls1.append(img[0].get('src'))
-            result1.append(c.xpath('string(.)'))
-
-        for c in content2:
-            img = c.findall('img')
-            if len(img) != 0:
-                result2.append('\n' + img[0].get('src'))
-                img_urls2.append(img[0].get('src'))
-            result1.append(c.xpath('string(.)'))
-        print(img_urls2)
-        if len(img_urls1) > len(img_urls2):
-            result = result1
-            img_urls = img_urls1
-        else:
-            result = result2
-            img_urls = img_urls2
-
         with open('./' + title + '/' + title + '_文章.txt', 'w', encoding='utf-8') as f:
-            f.write('\n'.join(result))
+            f.write("\n".join(data))
         with open('./' + title + '/' + title + '_图片urls.txt', 'w', encoding='utf-8') as f:
             f.write('\n'.join(img_urls))
+        sleep(10)
         for p in img_urls:
-            r = requests.get(p)
-            open('./' + title + '/' + p.split('/')[-1], 'wb').write(r.content)
+            r_ = self.get_img(p)
+            open('./' + title + '/' + p.split('/')[-1], 'wb').write(r_)
+
+    def get_img(self, img_u):
+        try:
+            r = requests.get(url=img_u)
+            sleep(10)
+            return r.content
+        except Exception as e:
+            print(e)
+            sleep(10)
+            return self.get_img(img_u)
 
 
 if __name__ == '__main__':
     spider = Spider()
-    data = []
-    for page in range(1, 120):
-        print("第{}页：".format(page))
-        for i in spider.get_url(page):
-            data.append(i)
-        sleep(10)
-    with open('urls.txt', 'w', encoding='utf-8') as f:
-        for i in data:
-            f.write(i+'\n')
+    # data = []
+    # for page in range(1, 120):
+    #     print("第{}页：".format(page))
+    #     for i in spider.get_url(page):
+    #         data.append(i)
+    #     sleep(10)
+    # with open('urls.txt', 'w', encoding='utf-8') as f:
+    #     for i in data:
+    #         f.write(i+'\n')
 
     with open('urls.txt', 'r', encoding='utf-8') as f:
         data = f.read()
-    data = data.split('\n')
-    num = 109
-    for i in data[num:]:
-        print("处理第{}个".format(num + 1))
-        print(data[num])
-        spider.detail(i)
-        num = num + 1
+    data_ = data.split('\n')
+    num_ = 127
+    for i in data_[num_:]:
+        print("处理第{}个：".format(num_ + 1))
+        print(i)
+        try:
+            spider.detail(i)
+        except Exception as e:
+            print(e)
+            spider.detail(i)
+        num_ = num_ + 1
