@@ -22,6 +22,7 @@ class Spider:
         "Host": "www.chongdiantou.com",
         "Referer": "https://www.chongdiantou.com/wp/archives/category/reviews/%e5%85%85%e7%94%b5%e5%99%a8",
         "Upgrade-Insecure-Requests": "1",
+        'Connection': 'close',
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0"
     }
 
@@ -44,8 +45,8 @@ class Spider:
 
         html = response.text
         content = etree.HTML(html)
-        text = content.xpath("//div[@class='post-content']/div/p")
-        img_urls = content.xpath("//div[@class='post-content']/div/p//img/@src")
+        text = content.xpath("//div[@class='post-content']//div/p")
+        img_urls = content.xpath("//div[@class='post-content']//img/@src")
         num = 0
         data = []
         for i in text:
@@ -58,7 +59,7 @@ class Spider:
         title = content.xpath("//div[@class='post']/h1/text()")[0].split('/')
         title = ' '.join(title)
         print(title)
-        print("\n".join(data))
+        print(len(img_urls))
         try:
             os.mkdir(title)
         except Exception as e:
@@ -75,8 +76,7 @@ class Spider:
 
     def get_img(self, img_u):
         try:
-            r = requests.get(url=img_u)
-            sleep(10)
+            r = requests.get(url=img_u,headers=self.data)
             return r.content
         except Exception as e:
             print(e)
@@ -85,6 +85,8 @@ class Spider:
 
 
 if __name__ == '__main__':
+    s = requests.session()
+    s.keep_alive = False
     spider = Spider()
     # data = []
     # for page in range(1, 120):
@@ -99,7 +101,7 @@ if __name__ == '__main__':
     with open('urls.txt', 'r', encoding='utf-8') as f:
         data = f.read()
     data_ = data.split('\n')
-    num_ = 127
+    num_ = 973
     for i in data_[num_:]:
         print("处理第{}个：".format(num_ + 1))
         print(i)
