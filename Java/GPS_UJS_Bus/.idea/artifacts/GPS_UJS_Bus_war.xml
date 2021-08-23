@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="GPS_UJS_Bus:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>GPS_UJS_Bus</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="GPS_UJS_Bus-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="GPS_UJS_Bus:war exploded" />
+    </root>
+  </artifact>
+</component>
