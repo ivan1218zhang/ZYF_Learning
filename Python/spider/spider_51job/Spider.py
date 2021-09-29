@@ -55,6 +55,7 @@ class JobSpider:
         self.url_list = []
         self.wd = webdriver.Chrome("chromedriver.exe")
         self.fail_num = 0
+        self.targetName=""
 
     def job_spider(self):
         """
@@ -108,7 +109,7 @@ class JobSpider:
                 job = ''.join(data.xpath("//div[@class='cn']/h1/text()"))
                 salary = ''.join(data.xpath("//div[@class='cn']/strong/text()"))
                 company_name = ''.join(data.xpath("//a[@class='catn']/text()"))
-                job_cate = re.search("职能类别.*", job_info).group().strip()
+                job_cate = re.search("职能类别.*?", job_info).group().strip()
                 breviary = ''.join(data.xpath("//div[@class='cn']/p[@class='msg ltype']/text()"))
                 company_in = data.xpath("//div[@class='com_tag']")
                 company_info = []
@@ -129,6 +130,9 @@ class JobSpider:
                 }
                 self.company.append(item)
                 self.url_list.remove(url)
+                with open(self.targetName + ".csv", 'a', encoding='utf-8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(item.values())
             except Exception as e:
                 logger.error(e)
                 logger.warning(url)
@@ -152,9 +156,10 @@ class JobSpider:
 
 
 def spider_main(target_name):
-    START_URL = "https://search.51job.com/list/000000,000000,0000,00,9,99,{},2,{}.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare=".format(target_name,'{}')
+    START_URL = "https://search.51job.com/list/020000,000000,0000,00,9,99,{},2,{}.html?lang=c&postchannel=0000&workyear=99&cotype=99&degreefrom=99&jobterm=99&companysize=99&ord_field=0&dibiaoid=0&line=&welfare=".format(target_name,'{}')
+    spider = JobSpider()
+    spider.targetName=target_name
     try:
-        spider = JobSpider()
         spider.wd.get(START_URL)
         maxpage=spider.wd.find_element_by_xpath("//div[@class='rt rt_page']").text.split(' ')[-1]
         print("一共{}页".format(maxpage))
@@ -175,30 +180,22 @@ def spider_main(target_name):
             for nn in range(len(bs)):
                 bs[nn].strip()
             spider.url_list = bs
-        with open(target_name+'fail_urls.txt', 'r')as fi:
+        start = time.time()
+        spider.run()
+        logger.info("总耗时 {} 秒".format(time.time() - start))
+    except Exception as e:
+        pass
+    print("{}条数据没有成功获取:".format(len(spider.url_list)))
+    spider.company=[]
+    try:
+        with open(target_name + 'fail_urls.txt', 'r')as fi:
             bs = fi.readlines()
             for nn in range(len(bs)):
                 bs[nn].strip()
             spider.url_list = bs
         start = time.time()
-        while True:
-            start_url_num = len(spider.url_list)
-            print(start_url_num)
-            spider.run()
-            end_url_num = len(spider.url_list)
-            print(end_url_num)
-            if start_url_num == end_url_num:
-                break
-            time.sleep(60 * 10)
+        spider.run()
         logger.info("总耗时 {} 秒".format(time.time() - start))
     except Exception as e:
         pass
-    finally:
-        spider.wd.close()
-        with open(target_name+".csv", 'a', encoding='utf-8', newline='') as f:
-            writer = csv.writer(f)
-            for i in spider.company:
-                writer.writerow(i.values())
     print("{}条数据没有成功获取:".format(len(spider.url_list)))
-    with open(target_name+"fail_urls.txt", 'w') as f:
-        f.writelines(spider.url_list)
